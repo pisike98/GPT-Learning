@@ -24,4 +24,13 @@ To explore the contents of this repository:
 
 *To be defined as projects are added.*
 
-- `README.md` - This file.
+downloaded https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
+for training data used wget, installed wget with hbrew
+
+To create a env 
+pwd
+python3 -m venv .venv
+source .venv/bin/activate
+pip install torch
+pip install numpy
+
