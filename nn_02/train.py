@@ -4,7 +4,7 @@ with open('input.txt', 'r', encoding='utf-8') as f:
 
 print("length of dataset in characters: ", len(text))
 
-print(text[:1000])
+# print(text[:1000])
 
 # A neural network cannot understand raw text or characters directly—it only works with numbers.
 # First, we extract every unique character present in the dataset (e.g., a-z, A-Z, punctuation, spaces).
@@ -17,7 +17,7 @@ print(text[:1000])
 chars = sorted(list(set(text)))
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
-print(''.join(chars))
+# print(''.join(chars))
 print(vocab_size)
 
 # Neural networks work with numbers, not characters, so we create two lookup tables.
