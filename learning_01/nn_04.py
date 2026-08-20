@@ -1,4 +1,5 @@
-#All we have done so far can be done using pytorch
+# Verification with Industry Standards
+# All we have done so far can be done using pytorch
 import torch
 
 x1 = torch.Tensor([2.0]).double()                ; x1.requires_grad = True

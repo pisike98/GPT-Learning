@@ -1,27 +1,12 @@
 # Neural Networks from Scratch: Build a Tiny Automatic Differentiation Engine (Micrograd Guide)
 
-Welcome to the foundational workspace for learning how neural networks work at their deepest, most fundamental level. This directory is heavily inspired by and follows Andrej Karpathy's famous **Micrograd** tutorial, where we build a tiny automatic differentiation (Autograd) engine from scratch.
+This directory is heavily inspired by and follows Andrej Karpathy's tutorial, where we build a tiny automatic differentiation (Autograd) engine from scratch.
 
-By building our own math engine (`Value` class) and neural network components (`Neuron`, `Layer`, `MLP`) using pure Python, we pull back the curtain on "magic" deep learning libraries like PyTorch. This guide is written for beginners—no prior machine learning experience or advanced calculus knowledge is assumed!
-
----
-
-## 1. Overview
-
-The purpose of this folder is to demystify the inner workings of deep learning. High-level frameworks like PyTorch, TensorFlow, and JAX make it incredibly easy to train complex neural networks in just a few lines of code. However, relying on these libraries without understanding what happens under the hood can lead to a shallow understanding and difficulty debugging training failures.
-
-This folder serves as an educational sandbox where you will:
-- **Build a tiny autograd engine** from scratch that supports addition, multiplication, exponentiation, negation, subtraction, division, and the hyperbolic tangent (`tanh`) activation function.
-- **Trace and visualize mathematical operations** as computation graphs using Graphviz.
-- **Assemble a complete neural network stack** (Neurons $\rightarrow$ Layers $\rightarrow$ Multi-Layer Perceptrons).
-- **Implement backpropagation** using the chain rule to automatically compute gradients.
-- **Train a neural network** using gradient descent on a binary classification dataset.
-
-**The Ultimate Goal:** Gain a crystalline, intuitive grasp of how data flows forward, how gradients flow backward, and how parameters update before graduating to PyTorch.
+By building our own math engine (`Value` class) and neural network components (`Neuron`, `Layer`, `MLP`) using pure Python, we pull back the curtain on "magic" deep learning libraries like PyTorch. 
 
 ---
 
-## 2. Learning Objectives
+## 1. Learning Objectives
 
 By exploring the scripts in this folder, you will master the following fundamental concepts of deep learning:
 
@@ -44,59 +29,7 @@ By exploring the scripts in this folder, you will master the following fundament
 
 ---
 
-## 3. File-by-File Explanation
-
-Rather than looking at a completed library, this directory contains a step-by-step learning progression. Here is how each file builds on the previous one:
-
-### 🚀 Step 1: `nn_01.py` — The Foundation of Calculus & The Value Object
-- **Why it exists:** To introduce the concept of derivatives numerically before transitioning to an object-oriented representation of variables.
-- **What new concept it introduces:**
-  - **Numerical Differentiation:** Using a tiny value $h = 0.000001$ to calculate the slope of $f(x) = 3x^2 - 4x + 5$ at $x = 2/3$.
-  - **The `Value` Class:** Introducing a custom class to wrap raw data and overload operators (`__add__`, `__mul__`) so we can write equations like `a * b + c` using custom objects.
-  - **Graph Tracking:** Updating `Value` to track its children (`_prev`) and the operation (`_op`) that created it.
-  - **Visualization:** Using Graphviz (`trace` and `draw_dot`) to render the full computation graph as an SVG image.
-- **How it builds:** It sets up the raw tracking structure. We can now build deep math expressions, but we can't perform backpropagation yet.
-
-### 🧠 Step 2: `nn_02_gradient.py` — Implementing the Chain Rule & The First Neuron
-- **Why it exists:** To teach our custom `Value` class how to automatically backpropagate gradients using the calculus chain rule.
-- **What new concept it introduces:**
-  - **The Gradient (`grad`):** Every `Value` now stores a `.grad` (initialized to $0.0$), representing the rate of change of the final output with respect to this value.
-  - **Local Backpropagation (`_backward`):** Every mathematical operation defines a local backward function. For example, for $out = a \times b$, the local derivatives are $\frac{\partial out}{\partial a} = b$ and $\frac{\partial out}{\partial b} = a$.
-  - **Topological Sorting:** Using Depth-First Search (DFS) to order the computation graph so we can propagate gradients in the correct reverse sequence (from output back to inputs) by calling `.backward()`.
-  - **Non-Linear Activations (`tanh`):** Implementing the hyperbolic tangent activation function to squish values between $-1$ and $+1$ and explain non-linearity.
-  - **Accumulating Gradients (`+=`):** Changing the gradient assignment from `=` to `+=` to handle nodes that are reused multiple times in a graph.
-- **How it builds upon previous files:** It upgrades the passive tracking tree from `nn_01.py` into an active autograd engine. We build a single, manual neuron (`x1*w1 + x2*w2 + b`) and successfully run backpropagation on it.
-
-### 🛠️ Step 3: `nn_03.py` — Building a Robust Mathematical Toolkit
-- **Why it exists:** To expand the mathematical capabilities of our `Value` class so it can support any mathematical formula.
-- **What new concept it introduces:**
-  - **Exponentiation (`__pow__`):** Allowing our class to handle exponents ($x^y$), which is critical for division and squared errors.
-  - **Right-Handed Operations (`__radd__`, `__rmul__`):** Allowing operations like `2 * a` and `1 + a` where a primitive number is on the left.
-  - **Division, Subtraction, and Negation (`__truediv__`, `__sub__`, `__neg__`):** Implementing these by combining existing primitive operations (e.g., $a / b = a \times b^{-1}$ and $a - b = a + (-b)$).
-  - **Exponential (`exp()`):** Implementing $e^x$ and using it to build `tanh` manually: $\tanh(x) = \frac{e^{2x} - 1}{e^{2x} + 1}$.
-- **How it builds upon previous files:** It completes the mathematical engine. Instead of using built-in shortcuts, we can now represent any complex function (including loss functions and custom activation equations) as a graph of primitive operations.
-
-### 🔬 Step 4: `nn_04_torch.py` — Verification with Industry Standards
-- **Why it exists:** To validate that our tiny custom `Value` class works exactly like PyTorch, the gold standard of deep learning.
-- **What new concept it introduces:**
-  - **PyTorch Tensors (`torch.Tensor`):** Instantiating scalar tensors in PyTorch.
-  - **Gradient Enablement (`requires_grad=True`):** Telling PyTorch to build a computation graph.
-  - **Double Precision (`.double()`):** Matching Python's 64-bit float precision.
-- **How it builds upon previous files:** It does not modify our engine, but it verifies our math. By running the same neuron calculation through PyTorch and printing out the gradients, we confirm that our engine's gradient calculations match PyTorch's to the last decimal place!
-
-### 🏋️ Step 5: `nn_05_neuralnet.py` — Constructing & Training an MLP
-- **Why it exists:** To scale our scalar `Value` class up into structural neural network components and execute a complete training loop.
-- **What new concept it introduces:**
-  - **`Neuron` Class:** Encapsulates random weight initializations, bias, and the forward calculation $y = \tanh(\sum w_i x_i + b)$.
-  - **`Layer` Class:** Manages multiple neurons in parallel.
-  - **`MLP` Class:** Stacks layers sequentially to create a multi-layer network.
-  - **Zero-Grading (`p.grad = 0.0`):** Resetting gradients before every backward pass to prevent gradients from accumulating across training iterations.
-  - **Loss Computation & Parameter Updates:** Computing Sum Squared Error and adjusting parameters in-place using Gradient Descent: `p.data += -learning_rate * p.grad`.
-- **How it builds upon previous files:** This is the culmination of the entire folder. It takes the mathematical `Value` class from `nn_03.py` and organizes it into a modular, object-oriented neural network capable of learning a dataset from scratch.
-
----
-
-## 4. Theory Section
+## 2. Theory Section
 
 ### 📈 What is a derivative?
 Imagine you are driving a car and you tap the gas pedal. A **derivative** measures how much your speed increases with a tiny tap of the pedal. 
@@ -309,7 +242,7 @@ The **learning rate** is a small multiplier (e.g., $0.1$ or $0.01$) that control
 
 ---
 
-## 5. Code Architecture
+## 3. Code Architecture
 
 Our neural network implementation is structured as a clear, object-oriented hierarchy:
 
@@ -351,7 +284,7 @@ Our neural network implementation is structured as a clear, object-oriented hier
 
 ---
 
-## 6. Training Flow
+## 4. Training Flow
 
 The complete process of training our neural network operates in an iterative loop:
 
@@ -413,56 +346,7 @@ The complete process of training our neural network operates in an iterative loo
 
 ---
 
-## 7. Important Python Concepts Used
-
-Our implementation leverages several key Python features:
-
-### 🐍 Special Magic Methods
-- **`__call__`**
-  - Allows an object to be called like a regular function.
-  - Used in `Neuron`, `Layer`, and `MLP` so we can write `mlp(x)` instead of `mlp.forward(x)`.
-- **`__repr__`**
-  - Defines how an object is represented as a string when printed.
-  - Instead of printing `<__main__.Value object at 0x...>`, printing a `Value` displays `Value(data=2.0)`.
-
-### ⚡ Operator Overloading
-Methods like `__add__`, `__mul__`, and `__pow__` allow us to intercept basic arithmetic operators and define custom behaviors for our objects:
-```python
-# When we write:
-d = a * b + c
-
-# Python translates it to:
-d = a.__mul__(b).__add__(c)
-```
-This lets us write natural-looking mathematical formulas while building a computation graph behind the scenes.
-
-### 🧩 Core Language Utilities
-- **List Comprehensions:** A compact way to create lists in Python.
-  ```python
-  self.w = [Value(random.uniform(-1, 1)) for _ in range(nin)]
-  ```
-- **`zip()`:** Iterates over multiple lists in parallel, pairing matching elements.
-  ```python
-  # Pairs weights with input values: [(w1, x1), (w2, x2), ...]
-  zip(self.w, x)
-  ```
-- **`sum(generator, start)`:** Computers the sum of items. By default, `sum()` starts with the integer `0`. Since we cannot add an integer `0` to a custom `Value` object, we provide the bias `self.b` as the starting value:
-  ```python
-  act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b)
-  ```
-- **`*args`:** Used to pass a variable number of positional arguments to a function as a tuple. (Though not used directly in our scripts, it is the standard way mathematical libraries accept arbitrary dimensions).
-- **`lambda`:** Small, anonymous, inline functions. We use a lambda to define a default "do nothing" backward pass for our leaf nodes:
-  ```python
-  self._backward = lambda: None
-  ```
-- **`isinstance`:** Checks if an object is of a specific type. We use this to support operations between `Value` objects and regular Python floats/integers:
-  ```python
-  other = other if isinstance(other, Value) else Value(other)
-  ```
-
----
-
-## 8. Mathematical Equations
+## 5. Mathematical Equations
 
 Here are the mathematical formulas implemented in this directory:
 
@@ -489,24 +373,13 @@ $$\theta \leftarrow \theta - \eta \times \frac{\partial \text{Loss}}{\partial \t
 
 ---
 
-## 9. Key Takeaways
+## 6. Key Takeaways
 
 By building and running the scripts in this folder, you have learned that:
 1. **Neural Networks are just large mathematical formulas:** There is no magic. Underneath the fancy terminology, a neural network is simply a sequence of additions, multiplications, and activations.
 2. **Backpropagation is just the chain rule in code:** By storing mathematical operations in a directed graph, we can automatically compute how any weight affects our final error by working backward.
 3. **Activation functions are mandatory:** Without non-linear functions like $\tanh$, stacking multiple layers is mathematically useless, as they collapse into a single straight line.
 4. **Learning is just walking downhill:** By calculating the gradient of the loss, we know exactly which way to nudge every knob (weights and biases) in the network to make the loss smaller.
-
----
-
-## 10. Next Steps
-
-Now that you have built a neural network from scratch, understood how computation graphs work, and verified your math against PyTorch, you are ready to transition!
-
-In the next section, we will:
-- Stop working with single scalars (`Value` class).
-- Start working with multi-dimensional arrays called **Tensors**.
-- Use **PyTorch's built-in layers and automatic differentiation engine**, which does exactly what we built here, but optimized in C++ to run blazingly fast on GPUs!
 
 ---
 
@@ -532,7 +405,7 @@ pip install torch numpy matplotlib graphviz
 ### 3. Execute any script
 ```bash
 python nn_01.py
-python nn_02_gradient.py
+python nn_02.py
 python nn_03.py
 python nn_04_torch.py
 python nn_05_neuralnet.py

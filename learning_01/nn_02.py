@@ -13,16 +13,24 @@ import matplotlib.pyplot as plt
 # input nodes and use the Chain Rule to compute gradients.
 #
 # Example:
+#   e = a * b
+#   d = e + c
+#   L = d * f
 #   dL/dL = 1
 #   dL/dd = f
 #   dL/df = d
-#   dL/de = dL/dd * dd/de
+#   dL/dc = dL/dd * dd/dc(= 1) = f -> this is the chain rule
+#   dL/de = dL/dd * dd/de(= 1) = f
+#   dL/da = dL/de(=f) * de/da(=b) = f*b
+#   dL/db = f * a
 #
 # Each Value object stores:
 #   data -> the numerical value at that node
 #   grad -> how much the final output changes if this value changes slightly
+#   if we want L to increase we need to increase leaf nodes in the direction of gradient say a.data += 0.01 * a.grad
 #
-# The neuron built below computes:
+# =============================================================================
+# The neuron is generally built as below:
 #
 #   weighted_sum = x1*w1 + x2*w2 + bias
 #   output = tanh(weighted_sum)
@@ -75,33 +83,23 @@ import matplotlib.pyplot as plt
 # instead of overwriting:
 #
 #   self.grad = local_derivative * out.grad
+
 class Value:
     def __init__(self, data, _children=(), _op='', label=''):
-        # numerical value stored in this node
         self.data = data
-
         # gradient of final output with respect to this node
         # Initially unknown, so set to 0
         self.grad = 0.0
-
         # every node should have a backward function
         # leaf nodes simply do nothing
         self._backward = lambda: None
-
-        # nodes that produced this node
-        # Example:
-        # c = a + b
-        # then c._prev = {a,b}
         self._prev = set(_children)
-
-        # operation that created this node
-        # '+', '*', 'tanh'
         self._op = _op
-
-        # human readable name
         self.label = label
+
     def __repr__(self):
         return f"Value(data={self.data})"
+    
     def __add__(self, other):
 
         # Forward pass
@@ -111,15 +109,12 @@ class Value:
         out = Value(self.data + other.data, (self, other), '+')
 
         def _backward():
-
             # derivative of (a+b) wrt a = 1
             self.grad += 1.0 * out.grad
-
             # derivative of (a+b) wrt b = 1
             other.grad += 1.0 * out.grad
 
         out._backward = _backward
-
         return out
     def __mul__(self, other):
 
@@ -128,10 +123,8 @@ class Value:
         out = Value(self.data * other.data, (self, other), '*')
 
         def _backward():
-
             # d(a*b)/da = b
             self.grad += other.data * out.grad
-
             # d(a*b)/db = a
             other.grad += self.data * out.grad
 
@@ -141,27 +134,20 @@ class Value:
     def tanh(self):
 
         x = self.data
-
         # Forward pass
         t = (math.exp(2*x)-1)/(math.exp(2*x)+1)
-
         out = Value(t, (self,), 'tanh')
-
         def _backward():
-
             # derivative of tanh(x)
             # = 1-tanh²(x)
-
             self.grad += (1-t**2) * out.grad
 
         out._backward = _backward
-
         return out
   
     def backward(self):
         # Stores nodes in topological (forward computation) order
         topo = []
-
         # Keeps track of visited nodes so we don't process a node twice
         visited = set()
 

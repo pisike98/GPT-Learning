@@ -1,3 +1,4 @@
+#The Foundation of Calculus & The Value Object
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,51 +8,30 @@ def f(x):
 
 print(f(3.0))
 
-xs = np.arange(-5, 5, 0.25)
-ys = f(xs)
-#plt.plot(xs, ys)
-#plt.show()
-
+xs = np.arange(-5, 5, 0.25) #This is a range of scalar values, -5, -4.75, ..., 4.75
+ys = f(xs) 
+# plt.plot(xs, ys)
+# plt.show() # Gives me the parabola
 
 h = 0.000001
 x = 2/3
-print((f(x + h) - f(x))/h) # Thsi gives me slope
-
-
-# les get more complex
-a = 2.0
-b = -3.0
-c = 10.0
-d = a*b + c
-print(d)
+print((f(x + h) - f(x))/h) # This gives me slope
 
 h = 0.0001
-
 # inputs
 a = 2.0
 b = -3.0
 c = 10.0
 
 d1 = a*b + c
-c += h # derivetive of d wrt to c
+c += h # derivetive of d wrt to c, you can do this w.r.t to a, b as well.
 d2 = a*b + c
 
 print('d1', d1)
 print('d2', d2)
 print('slope', (d2 - d1)/h)
 
-#Value Object
-
-class Value:
-  def __init__(self, data):
-    self.data = data
-  def __repr__(self):
-    return f"Value(data={self.data})"
-  
-a = Value(2.0)
-print(a)  
-
-
+# #Value Object, we are using this so that we know say value d1 came from a*b + c, instead of just 4 
 class Value:
   def __init__(self, data):
     self.data = data
@@ -60,9 +40,12 @@ class Value:
   
 a = Value(2.0)
 b = Value(3.0)
+print('a', a)  
+print('b', b)  
 #print(a+b) # Gives me error because python doesnt know how to add two value objects
 
 
+#Add functionality to value object
 class Value:
   def __init__(self, data):
     self.data = data
@@ -71,10 +54,10 @@ class Value:
   def __add__(self, other):
     out = Value(self.data + other.data)
     return out
-  
+# Define a, b here again if you use above one, it is old version of value, which didnt have add
 a = Value(2.0)
 b = Value(3.0)
-print(a+b) # works python internally calls a.__add__(b)
+print('a+b', a+b) # works python internally calls a.__add__(b)
 
 class Value:
   def __init__(self, data):
@@ -91,10 +74,13 @@ class Value:
 a = Value(2.0)
 b = Value(-3.0)
 c = Value(10.0)
-print(a*b+c) 
-
-# Now we have defined ourselves a Value object how add, mul works there
-# What's missing here is conencting like what variable depends on what
+print('a', a)  
+print('b', b)  
+print('c', c)  
+print('a*b+c = ', a*b+c) 
+print("=" * 60)
+# # Now we have defined ourselves a Value object how add, mul works there
+# # What's missing here is connecting like what variable depends on what
 
 class Value:
   def __init__(self, data, _children=(), _op='', label=''):
@@ -119,6 +105,8 @@ e = a*b; e.label='e'
 d = e+c; d.label='d'
 f = Value(-2.0, label='f')
 L = d * f; L.label = 'L'
+# L is the value of forward pass here.
+# grad is used for back propogation, currently every node is 0.0, more in nn_02.
 print(d) 
 print(d._prev)
 print(d._op)

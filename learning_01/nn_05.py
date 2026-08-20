@@ -1,12 +1,12 @@
+# Constructing & Training an MLP
 from nn_03 import Value, draw_dot
 import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
 class Neuron:
-
     def __init__(self, nin):
-        # Create one weight for each input.
+        # Create one weight for each input. nin is number of inputs to neuron
         # We initialize weights randomly so that different neurons
         # don't all start with the same values.
         self.w = [Value(random.uniform(-1, 1)) for _ in range(nin)]
@@ -42,11 +42,12 @@ class Neuron:
         # Return all learnable parameters of this neuron:
         # every weight and the bias.
         return self.w + [self.b]
+    
 # x = [2.0, 3.0]
 # n = Neuron(2) #Create 1 neuron which expects 2 inputs
 # print(n(x)) #calls call function o/p = Value(data=0.8723540545575671)
-class Layer:
 
+class Layer:
     def __init__(self, nin, nout):
         # Create 'nout' neurons.
         # Each neuron expects 'nin' inputs.
@@ -81,6 +82,7 @@ class Layer:
 # x = [2.0, 3.0]
 # n = Layer(2, 3) 
 # print(n(x))  #[Value(data=-0.41956886899900714), Value(data=0.14639031428846722), Value(data=0.9995659050631185)]
+
 class MLP:
     # MLP = Multi-Layer Perceptron
     #
@@ -90,7 +92,6 @@ class MLP:
     # Data flows like:
     #
     # Input → Layer 1 → Layer 2 → ... → Final Layer → Output
-
     def __init__(self, nin, nouts):
         # nin   = Number of input features.
         #
@@ -215,6 +216,7 @@ if __name__ == "__main__":
     print(ypred)
 
     # Mean Squared Error (actually Sum Squared Error here)
+    # loss measure how well neural net is performing
     loss = sum((yout - ygt) ** 2 for ygt, yout in zip(ys, ypred))
 
     print("\nLoss")
